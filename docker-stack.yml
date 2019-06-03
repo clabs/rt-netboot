@@ -1,0 +1,85 @@
+version: '3.6'
+
+networks:
+  netboot_net: {}
+
+volumes:
+  mysql_data: {}
+
+services:
+
+  # dhcpd  
+  dhcpd:
+    container_name: dhcpd
+    image: networkboot/dhcpd:latest
+    network_mode: host
+    restart: always
+    volumes:
+      - ./dhcpd:/data
+
+  # mariadb
+  pdns-mysql:
+    container_name: pdns-mysql
+    image: mariadb:latest
+    environment:
+     - MYSQL_ROOT_HOST=%
+     - MYSQL_ROOT_PASSWORD=ubersecret
+     - MYSQL_DATABASE=pdns
+     - MYSQL_USER=pdns
+     - MYSQL_PASSWORD=exceptionallysecure
+    networks:
+     - netboot_net
+    ports:
+     - 3306:3306
+    restart: always
+    volumes:
+     - mysql_data:/var/lib/mysql
+
+  # PowerDNS
+  pdns:
+    container_name: pdns
+    image: psitrax/powerdns
+    restart: always
+    environment:
+     - MYSQL_HOST=pdns-mysql
+     - MYSQL_USER=pdns
+     - MYSQL_PASS=exceptionallysecure
+     - MYSQL_DB=pdns
+    command:
+     - '--api=yes'
+     - '--api-key=sneakyapikey'
+     - '--webserver-address=0.0.0.0'
+     - '--webserver-allow-from=0.0.0.0/0'
+     - '--cache-ttl=120'
+     - '--allow-axfr-ips=127.0.0.1,123.1.2.3'
+    networks:
+     - netboot_net
+    ports:
+     - 172.23.0.2:53:53
+     - 172.23.0.2:53:53/udp
+    volumes:
+     - ./pdns/conf.d:/etc/pdns/conf.d
+     #- ./pdns/pdns.conf:/etc/pdns/pdns.conf
+    depends_on:
+     - pdns-mysql
+
+  #PowerDNS Admin
+  pdns-admin:
+    container_name: pdns-admin
+    image: really/powerdns-admin:latest
+    restart: always
+    environment:
+     - BIND_ADDRESS=0.0.0.0
+     - PDNS_STATS_URL=http://pdns:8081/
+     - PDNS_API_KEY=sneakyapikey
+     - SQLA_DB_USER=pdns
+     - SQLA_DB_PASSWORD=exceptionallysecure
+     - SQLA_DB_HOST=pdns-mysql
+     - SQLA_DB_NAME=pdns
+    networks:
+     - netboot_net
+    ports:
+     - 9393:9393/tcp
+    depends_on:
+     - pdns-mysql
+
