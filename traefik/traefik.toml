@@ -1,0 +1,10 @@
+defaultEntryPoints = ["http", "https"]
+
+[api]
+
+[web]
+address = ":8080"
+
+[docker]
+domain = "local.rocktreff.de"
+watch = true

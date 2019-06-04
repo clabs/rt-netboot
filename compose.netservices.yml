@@ -1,0 +1,28 @@
+version: '3.6'
+
+networks:
+  netservices: {}
+
+services:
+
+  # dhcpd  
+  dhcpd:
+    container_name: dhcpd
+    image: networkboot/dhcpd:latest
+    network_mode: host
+    restart: always
+    volumes:
+      - ./dhcpd:/data
+
+  # bind
+  bind:
+    container_name: bind
+    image: resystit/bind9:latest
+    volumes:
+      - ./bind/named.conf:/etc/bind/named.conf
+    ports:
+      - 53:53
+      - 172.23.0.2:53:53/udp
+    networks:
+      - netservices
+

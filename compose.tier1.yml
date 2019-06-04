@@ -1,0 +1,23 @@
+version: '3.6'
+
+networks:
+  proxy:
+
+services:
+  
+  traefik:
+    container_name: traefik
+    image: traefik:alpine
+    restart: always
+    networks:
+      - proxy
+    volumes:
+      - ./traefik/traefik.toml:/etc/traefik/traefik.toml
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - 80:80
+      - 443:443
+    labels:
+      - traefik.frontend.rule=Host:monitor.local.rocktreff.de
+      - traefik.port=8080
+
