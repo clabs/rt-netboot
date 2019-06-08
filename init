@@ -1,0 +1,19 @@
+#!/bin/sh
+
+export HOST_IP=`ip route| grep $(ip route |grep default | awk '{ print $5 }') | grep -v "default" | awk '/scope/ { print $9 }'`
+
+# pull images
+docker-compose \
+  -f compose.proxy.yml pull \
+  -f compose.netservices.yml \
+  -f compose.monitoring.yml \
+  -f compose.unifi.yml \
+  pull --parallel
+
+# start containers
+docker-compose \
+  -f compose.proxy.yml \
+  -f compose.netservices.yml \
+  -f compose.monitoring.yml \
+  -f compose.unifi.yml \
+  up -d

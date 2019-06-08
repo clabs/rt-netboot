@@ -5,7 +5,7 @@ networks:
 
 services:
 
-  # dhcpd  
+  # dhcpd
   dhcpd:
     container_name: dhcpd
     image: networkboot/dhcpd:latest
@@ -22,7 +22,7 @@ services:
       - ./bind/named.conf:/etc/bind/named.conf
     ports:
       - 53:53
-      - 172.23.0.2:53:53/udp
+      - "${HOST_IP}:53:53/udp"
     networks:
       - netservices
 
