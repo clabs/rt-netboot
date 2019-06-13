@@ -3,4 +3,4 @@ dhcpd/dhcpd.leases~
 traefik/certs/*
 pihole/etc/pihole/pihole-FTL.db
 pihole/etc/pihole/list.*
-pihole/etc/pihole/gravity.list
+pihole/etc/pihole/*.list
