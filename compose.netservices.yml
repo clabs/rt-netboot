@@ -51,3 +51,25 @@ services:
     networks:
       - netservices
       - proxy
+
+  recursor:
+    image: 'tcely/powerdns-recursor'
+    restart: 'always'
+    command:
+      [
+        '--disable-syslog=yes',
+        '--log-timestamp=no',
+        '--local-address=0.0.0.0',
+        '--setuid=pdns-recursor',
+        '--setgid=pdns-recursor'
+      ]
+    volumes:
+      - ./powerdns:/etc/powerdns
+    expose:
+      - '53/tcp'
+      - '53/udp'
+    ports:
+      - '127.0.0.1:5353:53/tcp'
+      - '127.0.0.1:5353:53/udp'
+    networks:
+      - netservices
