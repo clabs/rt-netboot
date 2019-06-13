@@ -3,6 +3,15 @@ version: '3.6'
 networks:
   netservices: {}
   proxy: {}
+  networks:
+  dns-ipv6:
+    enable_ipv6: true
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        -- subnet: 2001:3200:3200::/64
+          gateway: 2001:3200:3200::1
 
 services:
   # dhcpd
@@ -51,6 +60,8 @@ services:
     networks:
       - netservices
       - proxy
+      app_net:
+        ipv6_address: 2001:3200:3200::20
 
   pdns-recursor:
     container_name: pdns-recursor
