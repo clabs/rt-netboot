@@ -2,6 +2,7 @@ version: '3.6'
 
 networks:
   netservices: {}
+  proxy: {}
 
 services:
   # dhcpd
@@ -14,35 +15,39 @@ services:
       - ./dhcpd:/data
 
   # bind
-  bind:
-    container_name: bind
-    image: resystit/bind9:latest
-    volumes:
-      - ./bind/named.conf:/etc/bind/named.conf
-    ports:
-      - 53:53
-      - '${HOST_IP}:53:53/udp'
-    networks:
-      - netservices
+  #bind:
+  #  container_name: bind
+  #  image: resystit/bind9:latest
+  #  volumes:
+  #    - ./bind/named.conf:/etc/bind/named.conf
+  #  ports:
+  #    - 53:53
+  #    - '${HOST_IP}:53:53/udp'
+  #  networks:
+  #    - netservices
 
   # pihole
   pihole:
     container_name: pihole
-    imgage: pihole/pihole:latest
-  ports:
-    - '53:53/tcp'
-    - '53:53/udp'
-    - '67:67/udp'
-  environment:
-    TZ: 'Europe/Berlin'
-    WEBPASSWORD: '13nimda37'
-  labels:
-    - traefik.frontend.rule=Host:pihole.local.rocktreff.de
-    - traefik.port=80
-  volumes:
-    - './pihole/etc:/etc/pihole/'
-    - './pihole/dnsmasq.d/:/etc/dnsmasq.d/'
-  dns:
-    - 127.0.0.1
-    - 1.1.1.1
-  restart: unless-stopped
+    image: pihole/pihole:latest
+    restart: always
+    ports:
+      - '53:53/tcp'
+      - '53:53/udp'
+    environment:
+      TZ: 'Europe/Berlin'
+      WEBPASSWORD: '13nimda37'
+      VIRTUAL_HOST: pihole.local.rocktreff.de
+    labels:
+      - traefik.frontend.rule=Host:pihole.local.rocktreff.de
+      - traefik.port=80
+    volumes:
+      - './pihole/etc:/etc/pihole/'
+      - './pihole/dnsmasq.d/:/etc/dnsmasq.d/'
+    dns:
+      - 127.0.0.1
+      - 1.1.1.1
+    networks:
+      - netservices
+      - proxy
+
