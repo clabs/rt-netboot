@@ -38,7 +38,7 @@ services:
     environment:
       TZ: 'Europe/Berlin'
       WEBPASSWORD: '13nimda37'
-      VIRTUAL_HOST: pihole.local.rocktreff.de
+      # VIRTUAL_HOST: pihole.local.rocktreff.de
     labels:
       - traefik.frontend.rule=Host:pihole.local.rocktreff.de
       - traefik.port=80
