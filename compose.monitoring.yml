@@ -27,11 +27,12 @@ services:
       - traefik.frontend.rule=Host:prometheus.local.rocktreff.de
       - traefik.port=9090
     depends_on:
+      - traefik
       - cadvisor
     networks:
       - monitoring
       - proxy
- 
+
   # node exporter
   node-exporter:
     container_name: node_exporter
@@ -41,14 +42,14 @@ services:
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
       - /:/rootfs:ro
-    command: 
-      - '--path.procfs=/host/proc' 
+    command:
+      - '--path.procfs=/host/proc'
       - '--path.sysfs=/host/sys'
       - --collector.filesystem.ignored-mount-points
       - "^/(sys|proc|dev|host|etc|rootfs/var/lib/docker/containers|rootfs/var/lib/docker/overlay2|rootfs/run/docker/netns|rootfs/var/lib/docker/aufs)($$|/)"
     networks:
       - monitoring
- 
+
   # alertmanager
   alertmanager:
     container_name: alertmanager
@@ -76,7 +77,7 @@ services:
       - --allow_dynamic_housekeeping=true
       - --housekeeping_interval=30s
       - --global_housekeeping_interval=2m
-      - --disable_metrics=disk,tcp,udp   
+      - --disable_metrics=disk,tcp,udp
     networks:
       - monitoring
 
@@ -111,6 +112,8 @@ services:
     labels:
       - traefik.frontend.rule=Host:dashboard.local.rocktreff.de
       - traefik.port=3000
+    depends_on:
+      - traefik
     networks:
       - monitoring
       - proxy
