@@ -42,12 +42,11 @@ services:
       - traefik.frontend.rule=Host:pihole.local.rocktreff.de
       - traefik.port=80
     volumes:
-      - './pihole/etc:/etc/pihole/'
-      - './pihole/dnsmasq.d/:/etc/dnsmasq.d/'
+      - './pihole/etc/pihole:/etc/pihole/'
+      - './pihole/etc/dnsmasq.d:/etc/dnsmasq.d/'
     dns:
       - 127.0.0.1
       - 1.1.1.1
     networks:
       - netservices
       - proxy
-
