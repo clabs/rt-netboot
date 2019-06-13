@@ -52,7 +52,8 @@ services:
       - netservices
       - proxy
 
-  recursor:
+  pdns-recursor:
+    container_name: pdns-recursor
     image: 'tcely/powerdns-recursor'
     restart: 'always'
     command:
