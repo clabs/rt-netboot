@@ -58,8 +58,8 @@ services:
       - 127.0.0.1
       - 1.1.1.1
     networks:
-      - netservices
-      - proxy
+      netservices:
+      proxy:
       app_net:
         ipv6_address: 2001:3200:3200::20
 
