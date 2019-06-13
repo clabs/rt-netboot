@@ -62,7 +62,7 @@ services:
         '--log-timestamp=no',
         '--local-address=0.0.0.0',
         '--setuid=pdns-recursor',
-        '--setgid=pdns-recursor'
+        '--setgid=pdns-recursor',
       ]
     volumes:
       - ./powerdns:/etc/powerdns
