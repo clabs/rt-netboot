@@ -56,6 +56,7 @@ services:
       - "dashboard.local.rocktreff.de:172.23.0.2"
       - "pihole.local.rocktreff.de:172.23.0.2"
       - "unifi.local.rocktreff.de:172.23.0.2"
+      - "hier.koennte.ihre.werbung.stehen.local.rocktreff.de:100.64.23.1"
 
 
   pdns-recursor:
