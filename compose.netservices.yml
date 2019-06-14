@@ -51,6 +51,9 @@ services:
     networks:
       - netservices
       - proxy
+    extra_hosts:
+      - "monitor.local.rocktreff.de:172.23.0.2"
+
 
   pdns-recursor:
     container_name: pdns-recursor
