@@ -53,6 +53,9 @@ services:
       - proxy
     extra_hosts:
       - "monitor.local.rocktreff.de:172.23.0.2"
+      - "dashboard.local.rocktreff.de:172.23.0.2"
+      - "pihole.local.rocktreff.de:172.23.0.2"
+      - "unifi.local.rocktreff.de:172.23.0.2"
 
 
   pdns-recursor:
