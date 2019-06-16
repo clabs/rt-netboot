@@ -3,6 +3,7 @@ version: '3.6'
 networks:
   monitoring:
   proxy:
+  unifi:
 
 volumes:
   prometheus_data: {}
@@ -97,6 +98,19 @@ services:
     networks:
       - monitoring
 
+  # Unifi Exporter
+  unifi_exporter:
+    container_name: unifi_exporter
+    image: jessestuart/unifi_exporter:latest
+    restart: always
+    volumes:
+      - ./unifi/exporter.config.yml:/bin/config.yml
+    command:
+      - '-config.file=/bin/config.yml'
+    networks:
+      - monitoring
+      - unifi
+
   # grafana
   grafana:
     container_name: grafana
@@ -114,6 +128,8 @@ services:
       - traefik.port=3000
     depends_on:
       - traefik
+    ports:
+      - 3000:3000
     networks:
       - monitoring
       - proxy
