@@ -110,7 +110,18 @@ services:
     networks:
       - rocktreff
 
+  # APC UPS Exporter
+  apcupsd_exporter:
+    container_name: apcupsd_exporter
+    image: sfudeus/apcupsd_exporter:master_1.17.3
+    restart: unless-stopped
+    depends_on:
+      - apcupsd
+    entrypoint: /apcupsd_exporter -apcupsd.addr apcupsd:3551
+    networks:
+      - rocktreff
 
+  # apcupsd
   apcupsd:
     container_name: apcupsd
     image: gersilex/apcupsd:v1
@@ -122,18 +133,6 @@ services:
       - /dev:/dev
       - /var/lock:/var/lock
       - ./apcupsd/apcupsd.conf:/etc/apcupsd/apcupsd.conf
-    networks:
-      - rocktreff
-
-
-  # APC UPS Exporter
-  apcupsd_exporter:
-    container_name: apcupsd_exporter
-    image: sfudeus/apcupsd_exporter:master_1.17.3
-    restart: unless-stopped
-    depends_on:
-      - apcupsd
-    entrypoint: /apcupsd_exporter -apcupsd.addr apcupsd:3551
     networks:
       - rocktreff
 

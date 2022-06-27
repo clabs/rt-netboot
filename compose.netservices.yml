@@ -38,7 +38,7 @@ services:
     networks:
       - rocktreff
     extra_hosts:
-      - monitor.local.rocktreff.de:10.13.38.23
-      - dashboard.local.rocktreff.de:10.13.38.23
-      - pihole.local.rocktreff.de:10.13.38.23
-      - unifi.local.rocktreff.de:10.13.38.23
+      - monitor.local.rocktreff.de:${HOST_IP}
+      - dashboard.local.rocktreff.de:${HOST_IP}
+      - pihole.local.rocktreff.de:${HOST_IP}
+      - unifi.local.rocktreff.de:${HOST_IP}

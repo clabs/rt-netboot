@@ -2,9 +2,18 @@
 
 set -e
 
-export HOST_IP=`ip route | grep $(ip route | grep default | awk '{ print $5 }') | grep -v "default" | awk '/scope/ { print $9 }'`
-
-#export HOST_IP='10.13.38.23'
+get_host_ip() {
+  if [ -x "$(command -v ip)" ];
+  then
+    cmd "$(ip route get 1 | awk '{print $NF;exit}')"
+  elif [ -x "$(command -v ip)" ];
+  then
+    cmd "$(ifconfig | grep 'inet ' | grep -v '127.0.0.1' | awk '{print $2}')"
+  else
+    echo "Unable to retrieve host ip. Aborting ..." 1>&2
+    exit 1
+  fi
+}
 
 # pull images
 for DOCKER_IMAGE in $(cat *.yml | grep image | awk -F ": " '{print $NF}')
@@ -16,6 +25,7 @@ done
 
 # start containers
 docker-compose \
+  -e HOST_IP="$(get_host_ip)" \
   -f compose.proxy.yml \
   -f compose.netservices.yml \
   -f compose.monitoring.yml \
