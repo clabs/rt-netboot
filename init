@@ -6,7 +6,7 @@ get_host_ip() {
   if [ -x "$(command -v ip)" ];
   then
     cmd "$(ip route get 1 | awk '{print $NF;exit}')"
-  elif [ -x "$(command -v ip)" ];
+  elif [ -x "$(command -v ifconfig)" ];
   then
     cmd "$(ifconfig | grep 'inet ' | grep -v '127.0.0.1' | awk '{print $2}')"
   else
