@@ -1,5 +1,6 @@
-debug = true
+debug = false
 defaultEntryPoints = ["http", "https"]
+insecureSkipVerify = true
 
 [entryPoints]
   [entryPoints.http]
@@ -19,4 +20,4 @@ address = ":8080"
 [docker]
 domain = "local.rocktreff.de"
 watch = true
-network = "proxy"
+network = "rocktreff"

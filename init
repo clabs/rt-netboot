@@ -1,14 +1,18 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
-export HOST_IP=`ip route| grep $(ip route |grep default | awk '{ print $5 }') | grep -v "default" | awk '/scope/ { print $9 }'`
+set -e
+
+export HOST_IP=`ip route | grep $(ip route | grep default | awk '{ print $5 }') | grep -v "default" | awk '/scope/ { print $9 }'`
+
+#export HOST_IP='10.13.38.23'
 
 # pull images
-docker-compose \
-  -f compose.proxy.yml pull \
-  -f compose.netservices.yml \
-  -f compose.monitoring.yml \
-  -f compose.unifi.yml \
-  pull --parallel
+for DOCKER_IMAGE in $(cat *.yml | grep image | awk -F ": " '{print $NF}')
+do
+  echo "Checking if ${DOCKER_IMAGE} is present ..."
+  docker image inspect "${DOCKER_IMAGE}" &> /dev/null ||
+  docker pull "${DOCKER_IMAGE}" > /dev/null
+done
 
 # start containers
 docker-compose \

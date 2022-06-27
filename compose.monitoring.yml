@@ -1,21 +1,22 @@
 version: '3.6'
 
 networks:
-  monitoring:
-  proxy:
-  unifi:
+  rocktreff:
 
 volumes:
   prometheus_data: {}
   grafana_data: {}
+  loki_data: {}
+  syslog_data: {}
+  es_data: {}
 
 services:
 
   # prometheus
   prometheus:
     container_name: prometheus
-    image: prom/prometheus:v2.10.0
-    restart: always
+    image: prom/prometheus:v2.36.1
+    restart: unless-stopped
     volumes:
       - ./prometheus:/etc/prometheus
       - prometheus_data:/prometheus
@@ -31,14 +32,13 @@ services:
       - traefik
       - cadvisor
     networks:
-      - monitoring
-      - proxy
+      - rocktreff
 
   # node exporter
   node-exporter:
     container_name: node_exporter
     image: prom/node-exporter
-    restart: always
+    restart: unless-stopped
     volumes:
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
@@ -49,17 +49,17 @@ services:
       - --collector.filesystem.ignored-mount-points
       - "^/(sys|proc|dev|host|etc|rootfs/var/lib/docker/containers|rootfs/var/lib/docker/overlay2|rootfs/run/docker/netns|rootfs/var/lib/docker/aufs)($$|/)"
     networks:
-      - monitoring
+      - rocktreff
 
   # alertmanager
   alertmanager:
     container_name: alertmanager
-    image: prom/alertmanager
-    restart: always
+    image: prom/alertmanager:v0.24.0
+    restart: unless-stopped
     volumes:
       - ./alertmanager:/etc/alertmanager
     networks:
-      - monitoring
+      - rocktreff
     command:
       - '--config.file=/etc/alertmanager/config.yml'
       - '--storage.path=/alertmanager'
@@ -67,8 +67,8 @@ services:
   # cAdvisor
   cadvisor:
     container_name: cadvisor
-    image: google/cadvisor
-    restart: always
+    image: google/cadvisor:v0.33.0
+    restart: unless-stopped
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:rw
@@ -80,42 +80,68 @@ services:
       - --global_housekeeping_interval=2m
       - --disable_metrics=disk,tcp,udp
     networks:
-      - monitoring
+      - rocktreff
 
   # SNMP Exporter
   snmp_exporter:
     container_name: snmp_exporter
-    image: prom/snmp-exporter
-    restart: always
+    image: prom/snmp-exporter:v0.20.0
+    restart: unless-stopped
     networks:
-      - monitoring
+      - rocktreff
 
   # Blackbox Exporter
   blackbox_exporter:
     container_name: blackbox_exporter
-    image: prom/blackbox-exporter:master
-    restart: always
+    image: prom/blackbox-exporter:v0.21.1
+    restart: unless-stopped
     networks:
-      - monitoring
+      - rocktreff
 
   # Unifi Exporter
   unifi_exporter:
     container_name: unifi_exporter
-    image: jessestuart/unifi_exporter:latest
-    restart: always
+    image: jessestuart/unifi_exporter:0.4.0
+    restart: unless-stopped
     volumes:
       - ./unifi/exporter.config.yml:/bin/config.yml
     command:
       - '-config.file=/bin/config.yml'
     networks:
-      - monitoring
-      - unifi
+      - rocktreff
+
+
+  apcupsd:
+    container_name: apcupsd
+    image: gersilex/apcupsd:v1
+    restart: unless-stopped
+    privileged: true
+    ports:
+      - 3551:3551
+    volumes:
+      - /dev:/dev
+      - /var/lock:/var/lock
+      - ./apcupsd/apcupsd.conf:/etc/apcupsd/apcupsd.conf
+    networks:
+      - rocktreff
+
+
+  # APC UPS Exporter
+  apcupsd_exporter:
+    container_name: apcupsd_exporter
+    image: sfudeus/apcupsd_exporter:master_1.17.3
+    restart: unless-stopped
+    depends_on:
+      - apcupsd
+    entrypoint: /apcupsd_exporter -apcupsd.addr apcupsd:3551
+    networks:
+      - rocktreff
 
   # grafana
   grafana:
     container_name: grafana
-    image: grafana/grafana:6.2.1
-    restart: always
+    image: grafana/grafana:8.5.6
+    restart: unless-stopped
     depends_on:
       - prometheus
     volumes:
@@ -131,6 +157,37 @@ services:
     ports:
       - 3000:3000
     networks:
-      - monitoring
-      - proxy
+      - rocktreff
 
+  # rsyslog
+  rsyslog:
+    container_name: rsyslog
+    image: rsyslog/syslog_appliance_alpine:latest
+    restart: unless-stopped
+    volumes:
+      - ./rsyslog/rsyslog.conf:/etc/rsyslog.conf
+    ports:
+      - 514:514/udp
+      - 601:601
+      - 6514:6514
+    networks:
+      - rocktreff
+
+  #elasticsearch
+  elasticsearch:
+    container_name: elasticsearch
+    image: elasticsearch:7.17.4
+    restart: unless-stopped
+    environment:
+      - discovery.type=single-node
+      - node.name=elasticsearch
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - ELASTIC_PASSWORD=changeme
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+    networks:
+      - rocktreff

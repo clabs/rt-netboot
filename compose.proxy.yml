@@ -1,7 +1,7 @@
 version: '3.6'
 
 networks:
-  proxy:
+  rocktreff:
 
 services:
   
@@ -10,7 +10,7 @@ services:
     image: traefik:alpine
     restart: always
     networks:
-      - proxy
+      - rocktreff
     volumes:
       - ./traefik/traefik.toml:/etc/traefik/traefik.toml
       - ./traefik/certs:/certs

@@ -1,7 +1,7 @@
 version: '3.6'
 
 networks:
-  unifi:
+  rocktreff:
 
 volumes:
   db: {}
@@ -15,22 +15,22 @@ services:
   # mongodb
   mongodb:
     container_name: mongodb
-    image: mongo:3.4
+    image: mongo:3.6
     restart: always
     networks:
-      - unifi
+      - rocktreff
     volumes:
       - db:/data/db
 
   # unifi
   unifi:
     container_name: unifi
-    image: jacobalberty/unifi:latest
+    image: jacobalberty/unifi:v7
     restart: always
     depends_on:
       - mongodb
     networks:
-      - unifi
+      - rocktreff
     volumes:
       - data:/unifi/data
       - log:/unifi/log
@@ -40,8 +40,13 @@ services:
       DB_URI: mongodb://mongodb/unifi
       STATDB_URI: mongodb://mongodb/unifi_stat
       DB_NAME: unifi
+      TZ: Europe/Berlin
+    labels:
+      - traefik.frontend.rule=Host:unifi.local.rocktreff.de
+      - traefik.port=8443
+      - traefik.protocol=https
     ports:
-      - 172.23.0.2:161:161 # SNMP
+      - ${HOST_IP}:161:161 # SNMP
       - 3478:3478/udp # STUN
       - 6789:6789/tcp # Speed test
       - 8080:8080/tcp # Device/ controller comm.

@@ -1,8 +1,7 @@
 version: '3.6'
 
 networks:
-  netservices: {}
-  proxy: {}
+  rocktreff: {}
 
 services:
   # dhcpd
@@ -14,70 +13,32 @@ services:
     volumes:
       - ./dhcpd:/data
 
-  # bind
-  #bind:
-  #  container_name: bind
-  #  image: resystit/bind9:latest
-  #  volumes:
-  #    - ./bind/named.conf:/etc/bind/named.conf
-  #  ports:
-  #    - 53:53
-  #    - '${HOST_IP}:53:53/udp'
-  #  networks:
-  #    - netservices
-
   # pihole
   pihole:
     container_name: pihole
     image: pihole/pihole:latest
     restart: always
     ports:
-      - '53:53/tcp'
-      - '53:53/udp'
-      - '1337:80/tcp'
+      - 53:53/tcp
+      - 53:53/udp
+      - 1337:80/tcp
     environment:
-      TZ: 'Europe/Berlin'
-      WEBPASSWORD: '13nimda37'
-      # VIRTUAL_HOST: pihole.local.rocktreff.de
+      TZ: Europe/Berlin
+      WEBPASSWORD: 13nimda37
+      VIRTUAL_HOST: pihole.local.rocktreff.de
     labels:
       - traefik.frontend.rule=Host:pihole.local.rocktreff.de
       - traefik.port=80
     volumes:
-      - './pihole/etc/pihole:/etc/pihole/'
-      - './pihole/etc/dnsmasq.d:/etc/dnsmasq.d/'
+      - ./pihole/etc/pihole:/etc/pihole/
+      - ./pihole/etc/dnsmasq.d:/etc/dnsmasq.d/
     dns:
       - 127.0.0.1
       - 1.1.1.1
     networks:
-      - netservices
-      - proxy
+      - rocktreff
     extra_hosts:
-      - "monitor.local.rocktreff.de:172.23.0.2"
-      - "dashboard.local.rocktreff.de:172.23.0.2"
-      - "pihole.local.rocktreff.de:172.23.0.2"
-      - "unifi.local.rocktreff.de:172.23.0.2"
-      - "hier.koennte.ihre.werbung.stehen.local.rocktreff.de:100.64.23.1"
-
-
-  pdns-recursor:
-    container_name: pdns-recursor
-    image: 'tcely/powerdns-recursor'
-    restart: 'always'
-    command:
-      [
-        '--disable-syslog=yes',
-        '--log-timestamp=no',
-        '--local-address=0.0.0.0',
-        '--setuid=pdns-recursor',
-        '--setgid=pdns-recursor',
-      ]
-    volumes:
-      - ./powerdns:/etc/powerdns
-    expose:
-      - '53/tcp'
-      - '53/udp'
-    ports:
-      - '172.23.0.2:5353:53/tcp'
-      - '172.23.0.2:5353:53/udp'
-    networks:
-      - netservices
+      - monitor.local.rocktreff.de:10.13.38.23
+      - dashboard.local.rocktreff.de:10.13.38.23
+      - pihole.local.rocktreff.de:10.13.38.23
+      - unifi.local.rocktreff.de:10.13.38.23
